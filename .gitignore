@@ -1,0 +1,16 @@
+# Build outputs
+*.class
+/out/
+build/
+
+# IntelliJ files
+.idea/
+*.iml
+
+# Temp files
+*.log
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
