@@ -7,7 +7,7 @@ import java.rmi.registry.Registry;
 
 public class LoginClient
 {
-    public static void mais (String[] args)
+    public static void main (String[] args)
     {
         try
         {
