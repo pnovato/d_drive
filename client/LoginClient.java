@@ -1,6 +1,5 @@
 package edu.ufp.inf.sd.rmi.projecto_SD.d_drive.client;
-import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.LoginServiceRI;
-import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.FileManagerRI;
+import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.*;
 import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.server.LoginServiceImpl;
 
 import java.rmi.registry.LocateRegistry;
@@ -8,50 +7,49 @@ import java.rmi.registry.Registry;
 
 public class LoginClient
 {
+
     public static void main(String[] args)
     {
         try
         {
-            // Conectar ao rmiregistry na porta personalizada
+            // Conectar ao rmiregistry na porta definida
             Registry registry = LocateRegistry.getRegistry("localhost", 15679);
 
-            // Fazer lookup do serviço de login
+            // Obter referência remota ao serviço de login
             LoginServiceRI loginService = (LoginServiceRI) registry.lookup("LoginService");
 
             String username = "patrick";
-            String password = "1234";
+            String password = "123";
 
-            System.out.println("Tentando registar utilizador...");
+            // Criar instância remota do cliente (callback)
+            PeerClientRI peerClient = new PeerClientImpl(username);
+
             boolean registered = loginService.register(username, password);
-            System.out.println("Registo: " + registered);
 
-            System.out.println("Tentando login...");
-            boolean loggedIn = loginService.login(username, password);
-            System.out.println("Login: " + loggedIn);
+            System.out.println("Tentando login remoto com callback...");
 
-            if (loggedIn)
+            // Login com callback
+            UserSessionRI session = loginService.login(username, password, peerClient);
+
+            if (session != null)
             {
-                FileManagerRI fm = loginService.getFileManager(username);
+                System.out.println("Login realizado com sucesso!");
 
-                System.out.println("Criando pasta 'teste'...");
-                boolean created = fm.createFolder(username, "/", "teste");
-                System.out.println("Pasta criada: " + created);
+                FileManagerRI fileManager = session.getFileManager();
 
-                System.out.println("Conteúdo de /local:");
-                for (String item : fm.listDirectory(username, "/"))
-                {
-                    System.out.println(" - " + item);
-                }
+                boolean shared = fileManager.shareFolder("patrick", "ana", "testeSync");
+                System.out.println("Pasta partilhada com ana: " + shared);
 
-                System.out.println("Renomeando 'teste' para 'meuTeste'...");
-                boolean renamed = fm.renameFolder(username, "/teste", "meuTeste");
-                System.out.println("Renomeado: " + renamed);
+                // Teste: criar pasta "testeSync"
+                System.out.println("Criando pasta partilhada 'testeSync'...");
+                boolean created = fileManager.createFolder(username, "/", "testeSync");
+                System.out.println("Criada: " + created);
 
-                System.out.println("Eliminando pasta 'meuTeste'...");
-                boolean deleted = fm.deleteFolder(username, "/meuTeste");
-                System.out.println("Eliminado: " + deleted);
             }
-
+            else
+            {
+                System.out.println("Login falhou. Verifique credenciais.");
+            }
         }
         catch (Exception e)
         {

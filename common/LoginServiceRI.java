@@ -7,7 +7,5 @@ import java.rmi.Remote;
 public interface LoginServiceRI extends Remote
 {
     boolean register (String username, String password) throws  RemoteException;
-    boolean login (String username, String password) throws RemoteException;
-
-    FileManagerRI getFileManager(String username) throws RemoteException;
+    UserSessionRI login (String username, String password, PeerClientRI peerClientRI) throws RemoteException;
 }

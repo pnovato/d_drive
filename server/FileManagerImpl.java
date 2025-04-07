@@ -1,6 +1,10 @@
 package edu.ufp.inf.sd.rmi.projecto_SD.d_drive.server;
 
 import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.FileManagerRI;
+import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.PeerClientRI;
+import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.SessionManager;
+import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.UserSessionRI;
+
 import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -67,4 +71,52 @@ public class FileManagerImpl extends UnicastRemoteObject implements FileManagerR
         return oldFile.renameTo(newFile);
     }
 
+    @Override
+    public boolean shareFolder(String fromUser, String toUser, String folderName) throws RemoteException
+    {
+        try
+        {
+            // Caminho da pasta que vai ser partilhada
+            File sourceFolder = new File(baseDir + "/" + fromUser + "/local/" + folderName);
+
+            if (!sourceFolder.exists() || !sourceFolder.isDirectory())
+            {
+                System.out.println("Pasta a partilhar não existe: " + sourceFolder.getPath());
+                return false;
+            }
+
+            // Caminho de destino da partilha
+            String sharedName = fromUser + "_" + folderName;
+            File targetFolder = new File(baseDir + File.separator + toUser + "/partilhas/" + sharedName);
+
+            if (targetFolder.exists())
+            {
+                System.out.println("Pasta já foi partilhada com esse utilizador.");
+                return false;
+            }
+
+            // Criar pasta partilhas vazia
+            boolean created = targetFolder.mkdirs();
+
+            if (created)
+            {
+                //ONDE ENVIO NOTIFICAÇÃO SOBRE A NOVA PASTA PARTILHADA
+                System.out.println("Pasta partilhada criada em: " + targetFolder.getPath());
+                UserSessionRI toUserSession = SessionManager.activeSessions.get(toUser);
+                if (toUserSession != null)
+                {
+                    PeerClientRI peer = toUserSession.getPeerClientRI();
+                    peer.notifyUpdate(folderName, "Você recebeu uma nova partilha de " + fromUser + "!");
+                }
+                else
+                    System.out.println("Utilizador " + toUser + " não está online. Notificação não enviada.");
+            }
+            return created;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

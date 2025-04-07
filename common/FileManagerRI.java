@@ -10,4 +10,5 @@ public interface FileManagerRI extends Remote
     boolean createFolder (String username, String path, String folderName) throws RemoteException;
     boolean deleteFolder (String username, String path) throws RemoteException;
     boolean renameFolder (String username, String oldPath, String newName) throws RemoteException;
+    boolean shareFolder(String fromUser, String toUser, String folderName) throws RemoteException;
 }
