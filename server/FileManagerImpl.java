@@ -10,7 +10,7 @@ import java.util.List;
 
 public class FileManagerImpl extends UnicastRemoteObject implements FileManagerRI
 {
-    private final String baseDir = "users";
+    private final String baseDir = System.getProperty("user.dir") + "/../users";
 
     public FileManagerImpl() throws RemoteException
     {

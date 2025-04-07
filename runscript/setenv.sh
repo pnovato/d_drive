@@ -13,7 +13,7 @@ export CLASSES=$PROJECT_BASE/out/production/SD
 export LIB=$PROJECT_BASE/lib
 
 # Classpath completo
-export CP=$CLASSES:$LIB/*
+export CP=/home/ptrck/UFP/3_ano/SD/out/production/SD
 
 # Policy
 export JAVA_SECURITY_POLICY=$PROJECT_BASE/src/security.policy

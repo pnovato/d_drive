@@ -10,7 +10,7 @@ public class LoginServer
         try
         {
             LoginServiceRI loginService = new LoginServiceImpl();
-            Registry registry = LocateRegistry.createRegistry(1099);
+            Registry registry = LocateRegistry.getRegistry("localhost",15679);
             registry.rebind("LoginService", loginService);
             System.out.println("LoginService pronto e registrado no RMI registry");
         }
