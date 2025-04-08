@@ -3,11 +3,11 @@ Distributed Drive System
 
 ## Current Project Status
 
-| Requirement | Status | Description                                                   |
-|-----------|--------|---------------------------------------------------------------|
-| R1 | DONE   | User registration and login via RMI                           |
-| R2 | DONE   | Per-user directory structure (`local/` and `shared/`) |
-| R3 (RMI) | DONE   | Synchronous update propagation using RMI callbacks  |
+| Requirement | Status | Description                                              |
+|-----------|--------|----------------------------------------------------------|
+| R1 | DONE   | User registration and login via RMI                      |
+| R2 | DONE   | Per-user directory structure (`local/` and `partilhas/`) |
+| R3 (RMI) | DONE   | Synchronous update propagation using RMI callbacks       |
 
 ---
 
