@@ -8,7 +8,7 @@ Distributed Drive System
 | R1 | DONE   | User registration and login via RMI                      |
 | R2 | DONE   | Per-user directory structure (`local/` and `partilhas/`) |
 | R3 (RMI) | DONE   | Synchronous update propagation using RMI callbacks       |
-
+| R3 (RabbitMQ) | DONE   | Asynchronous message exchange via a broker |
 ---
 
 ## Dynamically generated folder structure
@@ -30,12 +30,19 @@ Distributed Drive System
 
 ### `common/` — Remote Interfaces
 
-| Interface         | Purpose |
-|------------------|---------|
-| `LoginServiceRI` | Registers/logs in users and returns session objects |
-| `FileManagerRI`  | Folder operations: create, list, delete, rename, share |
-| `UserSessionRI`  | Represents an active user session: provides access to `FileManagerRI` and `PeerClientRI` |
-| `PeerClientRI`   | Remote callback interface for user notifications via RMI |
+| Interface | Purpose                                                                                  |
+|-----------|------------------------------------------------------------------------------------------|
+| `LoginServiceRI` | Registers/logs in users and returns session objects                                      |
+| `FileManagerRI` | Folder operations: create, list, delete, rename, share                                   |
+| `UserSessionRI` | Represents an active user session: provides access to `FileManagerRI` and `PeerClientRI` |
+| `PeerClientRI` | Remote callback interface for user notifications via RMI                                 |
+
+| Class           | Purpose                                                                                  |
+|-----------------| ---------------------------------------------------------------------------------------- |              
+| `RabbitManager` | Manages de asyncronous comunication between users                                        |
+| `User`          | ... |
+| `SessionManager` | ... |
+| `UserDatabase` | ... | 
 
 ---
 
@@ -64,11 +71,11 @@ Distributed Drive System
 
 ## Shell Scripts for Execution `.sh`
 
-| Script              | Description |
-|---------------------|-------------|
-| `runregistry.sh`    | Starts the `rmiregistry` on port 15679 |
-| `runserver.sh`      | Launches the RMI server (`LoginServer`) |
-| `runclient.sh`      | Executes the client (`LoginClient`) |
+| Script              | Description                                                               |
+|---------------------|---------------------------------------------------------------------------|
+| `runregistry.sh`    | Starts the `rmiregistry` on port 15679                                    |
+| `runserver.sh`      | Launches the RMI server (`LoginServer`)                                   |
+| `runclient.sh`      | Executes the client (`LoginClient`)  with a dinamic input at the terminal |
 
 ---
 
@@ -94,7 +101,7 @@ Distributed Drive System
 
 ## Upcoming Tasks
 
-- [ ] Implement **asynchronous update propagation** using **RabbitMQ** (publish/subscribe)
+- [x] Implement **asynchronous update propagation** using **RabbitMQ** (publish/subscribe)
 - [ ] Synchronize actual folder contents between shared users
 - [ ] Add file upload/download functionality
 ---

@@ -1,9 +1,6 @@
 package edu.ufp.inf.sd.rmi.projecto_SD.d_drive.server;
 
-import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.FileManagerRI;
-import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.PeerClientRI;
-import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.SessionManager;
-import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.UserSessionRI;
+import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.*;
 
 import java.io.File;
 import java.rmi.RemoteException;
@@ -79,6 +76,12 @@ public class FileManagerImpl extends UnicastRemoteObject implements FileManagerR
             // Caminho da pasta que vai ser partilhada
             File sourceFolder = new File(baseDir + "/" + fromUser + "/local/" + folderName);
 
+            if (fromUser.equals(toUser)) {
+                System.out.println("[AVISO] Utilizador tentou partilhar consigo mesmo.");
+                return false;
+            }
+
+
             if (!sourceFolder.exists() || !sourceFolder.isDirectory())
             {
                 System.out.println("Pasta a partilhar não existe: " + sourceFolder.getPath());
@@ -98,10 +101,12 @@ public class FileManagerImpl extends UnicastRemoteObject implements FileManagerR
             // Criar pasta partilhas vazia
             boolean created = targetFolder.mkdirs();
 
+            //ONDE ENVIO NOTIFICAÇÃO SOBRE A NOVA PASTA PARTILHADA VIA RMI OU RABBITMQ
             if (created)
             {
-                //ONDE ENVIO NOTIFICAÇÃO SOBRE A NOVA PASTA PARTILHADA
                 System.out.println("Pasta partilhada criada em: " + targetFolder.getPath());
+
+                //R3: RMI - notificação síncrona (se online)
                 UserSessionRI toUserSession = SessionManager.activeSessions.get(toUser);
                 if (toUserSession != null)
                 {
@@ -110,6 +115,10 @@ public class FileManagerImpl extends UnicastRemoteObject implements FileManagerR
                 }
                 else
                     System.out.println("Utilizador " + toUser + " não está online. Notificação não enviada.");
+
+                //R3: RabbitMQ - notificação assíncrona
+                String rabbitMessage = "Pasta '" + folderName + "' partilhada contigo por " + fromUser;
+                RabbitManager.publishUpdate(toUser, rabbitMessage);
             }
             return created;
         }
