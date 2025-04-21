@@ -1,107 +1,121 @@
+
 # d_drive
-Distributed Drive System
+**Distributed Drive System – RMI + RabbitMQ**
 
-## Current Project Status
+## Project Status
 
-| Requirement | Status | Description                                              |
-|-----------|--------|----------------------------------------------------------|
-| R1 | DONE   | User registration and login via RMI                      |
-| R2 | DONE   | Per-user directory structure (`local/` and `partilhas/`) |
-| R3 (RMI) | DONE   | Synchronous update propagation using RMI callbacks       |
-| R3 (RabbitMQ) | DONE   | Asynchronous message exchange via a broker |
----
-
-## Dynamically generated folder structure
-
-    ├── users/
-              ├── patrick/  ├── local/
-                            │
-                            └── partilhas/ 
-
-              ├── ana/      ├── local/
-                            │
-                            └── partilhas/ │
-                                           └── patrick_testeSync/
-
+| Requirement     | Status | Description                                                                 |
+|-----------------|------|-----------------------------------------------------------------------------|
+| R1              | DONE | User registration and login via RMI                                          |
+| R2              | DONE | Dynamic per-user folder structure (`local/`, `partilhas/`)                   |
+| R3 (RMI)        | DONE | Synchronous folder sharing via RMI + remote callbacks                        |
+| R3 (RabbitMQ)   | DONE | Asynchronous folder sharing via RabbitMQ messaging                           |
+| R4              | DONE | Folder synchronization (copy from shared)                                    |
+| R5              | DONE | Persistent propagation: JSON tracking of shared folders                      |
 
 ---
 
-## Project Structure
+## Generated Folder Structure
 
-### `common/` — Remote Interfaces
-
-| Interface | Purpose                                                                                  |
-|-----------|------------------------------------------------------------------------------------------|
-| `LoginServiceRI` | Registers/logs in users and returns session objects                                      |
-| `FileManagerRI` | Folder operations: create, list, delete, rename, share                                   |
-| `UserSessionRI` | Represents an active user session: provides access to `FileManagerRI` and `PeerClientRI` |
-| `PeerClientRI` | Remote callback interface for user notifications via RMI                                 |
-
-| Class           | Purpose                                                                                  |
-|-----------------| ---------------------------------------------------------------------------------------- |              
-| `RabbitManager` | Manages de asyncronous comunication between users                                        |
-| `User`          | ... |
-| `SessionManager` | ... |
-| `UserDatabase` | ... | 
-
----
-
-### `server/` — Server-side Implementations
-
-| Class                | Purpose |
-|----------------------|---------|
-| `LoginServiceImpl`   | Handles registration, login, and session creation |
-| `UserSessionImpl`    | Represents the session state: includes file manager and client callback |
-| `FileManagerImpl`    | Manages folder operations and RMI-based sharing logic |
-| `User`               | Simple user model with username/password |
-| `UserDatabase`       | In-memory database for user authentication |
-| `LoginServer`        | Initializes and binds the login service to the RMI registry |
-| `SessionManager`     | Static access point for managing active sessions |
+```bash
+ users/
+├── patrick/
+│   ├── local/
+│   └── partilhas/
+│       ├── symbolic_links/
+│       │   └── patrick_symbolic_link_testeSync/
+│       └── real_copy_ptrck_pastaR5/
+├── ana/
+│   ├── local/
+│   └── partilhas/
+```
+```bash
+ data/
+├── partilhas.json   # Persistent tracking of real shared folders (R5)
+```
 
 ---
 
-### `client/` — Client-side Code
+## Architecture
 
-| Class             | Purpose |
-|-------------------|---------|
-| `LoginClient`     | Connects to the server, logs in, performs folder operations, and triggers sharing |
-| `PeerClientImpl`  | Implements the RMI callback to receive notifications (e.g., when a folder is shared) |
+### `common/` — Interfaces & Utilities
 
----
+| Interface         | Description                                                              |
+|------------------|---------------------------------------------------------------------------|
+| `LoginServiceRI`  | Remote interface for login/registration/session                          |
+| `UserSessionRI`   | Represents a session: grants access to `FileManagerRI` and `PeerClientRI`|
+| `FileManagerRI`   | Folder operations: create, delete, rename, share, sync                   |
+| `PeerClientRI`    | Callback interface for RMI notifications                                 |
 
-## Shell Scripts for Execution `.sh`
-
-| Script              | Description                                                               |
-|---------------------|---------------------------------------------------------------------------|
-| `runregistry.sh`    | Starts the `rmiregistry` on port 15679                                    |
-| `runserver.sh`      | Launches the RMI server (`LoginServer`)                                   |
-| `runclient.sh`      | Executes the client (`LoginClient`)  with a dinamic input at the terminal |
-
----
-
-## Example Flow
-
-1. User `patrick` logs in and creates folder `testeSync`
-2. Shares it with `ana` via `shareFolder("patrick", "ana", "testeSync")`
-3. This structure is created: `users/ana/shared/patrick_testeSync/`
-4. If `ana` is online, she receives:
-
-
-[Notification for ana] Change in 'testeSync': You received a new shared folder from patrick!
+| Class             | Purpose                                                                  |
+|------------------|---------------------------------------------------------------------------|
+| `RabbitManager`   | Publishes/subscribes messages via RabbitMQ for async communication       |
+| `PartilhaManager` | Uses JSON to persistently track folder sharing states (R5)               |
 
 ---
 
-## Technical Notes
-- All remote communication is implemented using **Java RMI**
-- Session and callback references are stored in memory during execution
-- Directory structure is created dynamically on the file system
-- Implementation is cleanly separated into client/server/common layers
+### `server/` — Service Logic
+
+| Class               | Purpose                                                             |
+|---------------------|---------------------------------------------------------------------|
+| `LoginServiceImpl`  | Handles user registration/login and session creation               |
+| `UserSessionImpl`   | Represents the authenticated session for a user                    |
+| `FileManagerImpl`   | Implements all file/directory operations and sharing logic          |
+| `UserDatabase`      | In-memory credential store                                          |
+| `SessionManager`    | Keeps track of online users and their sessions                     |
+| `LoginServer`       | Initializes and binds the RMI service on the specified registry     |
 
 ---
 
-## Upcoming Tasks
+### `client/` — User Interaction
 
-- [x] Implement **asynchronous update propagation** using **RabbitMQ** (publish/subscribe)
-- [ ] Synchronize actual folder contents between shared users
-- [ ] Add file upload/download functionality
+| Class              | Role                                                                  |
+|--------------------|-----------------------------------------------------------------------|
+| `LoginClient`      | Connects to RMI service, handles folder operations, shares folders    |
+| `PeerClientImpl`   | Implements the callback to receive real-time notifications via RMI    |
+
 ---
+
+## Shell Scripts for Execution
+
+| Script             | Description                                                        |
+|--------------------|--------------------------------------------------------------------|
+| `runregistry.sh`   | Launches `rmiregistry` on default or specified port (e.g., 1099)   |
+| `runserver.sh`     | Starts the RMI server and binds the service                        |
+| `runclient.sh`     | Executes the client; prompts for user/pass and passes arguments    |
+| `setenv.sh`        | Defines environment variables: hostnames, ports, classpath, etc.   |
+
+---
+
+## Example of Flow (R1 → R5)
+
+1. `patrick` registers and logs in
+2. Creates a folder: `/local/pastaR5`
+3. Shares folder with `ana`
+    - If **symbolic**: only a placeholder is created under `partilhas/symbolic_links/`
+    - If **real**: full contents copied to `partilhas/real_copy_*`
+    - If `ana` is **online**, RMI callback notifies her
+    - Otherwise, RabbitMQ message is sent
+4. Renaming/deleting the original folder updates all **real copies** (R5)
+5. Shared folders are persistently tracked in `partilhas.json`
+
+---
+
+## Technologies
+
+- **Java RMI** for synchronous, callback-based sharing and session handling
+- **RabbitMQ** for async messaging and notifications (via Publish/Subscribe)
+- **org.json** (json-20190722) for lightweight persistent tracking (R5)
+
+---
+
+## Final Considerations
+
+- Project meets **all required specifications** (R1 → R5)
+- Users can share folders both **transiently** (symbolic) and **persistently** (real copy)
+- System supports both **online updates (RMI)** and **offline notifications (RabbitMQ)**
+- JSON file ensures folder propagation is **trackable and consistent**
+
+---
+
+*This README was made by **pnovato***
