@@ -7,14 +7,14 @@ export PATH=$JAVA_HOME/bin:$PATH
 export PROJECT_BASE=/home/ptrck/UFP/3_ano/SD/src/edu/ufp/inf/sd/rmi/projecto_SD/d_drive
 
 # Caminho das classes compiladas
-export CLASSES=$PROJECT_BASE/out/production/SD
+export CLASSES=/home/ptrck/UFP/3_ano/SD/out/production/SD
 
 # Caminho das libs (RabbitMQ)
-export LIB="/home/ptrck/UFP/3_ano/SD/lib/amqp-client-5.24.0.jar:/home/ptrck/UFP/3_ano/SD/lib/slf4j-api-1.7.30.jar:/home/ptrck/UFP/3_ano/SD/lib/slf4j-simple-1.7.30.jar"
+export LIB="/home/ptrck/UFP/3_ano/SD/lib/amqp-client-5.24.0.jar:/home/ptrck/UFP/3_ano/SD/lib/slf4j-api-1.7.30.jar:/home/ptrck/UFP/3_ano/SD/lib/slf4j-simple-1.7.30.jar:/home/ptrck/UFP/3_ano/SD/lib/json-20190722.jar"
 export SERVER_RMI_HOST=localhost
-export SERVER_RMI_PORT=15679
+export SERVER_RMI_PORT=1099
 export CLIENT_RMI_HOST=localhost
-export CLIENT_RMI_PORT=15679
+export CLIENT_RMI_PORT=1099
 export SERVICE_NAME=LoginService
 
 

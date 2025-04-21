@@ -2,4 +2,4 @@
 source ./setenv.sh
 
 cd $CLASSES
-rmiregistry 15679 &
+rmiregistry 1099 &

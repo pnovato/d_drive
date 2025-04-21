@@ -45,7 +45,6 @@ public class LoginClient
                     String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
                     System.out.println("[RabbitMQ] Nova mensagem: " + message);
                 };
-                System.out.println("🔍 DEBUG: subscrevendo fila RabbitMQ com username = " + username);
                 RabbitManager.subscribeToUserQueue(username, callback);
 
 
@@ -69,7 +68,7 @@ public class LoginClient
                 // ────────────────────────────────────────────────
                 // R3: Pasta partilhada (via RMI)
                 //fileManager.createFolder(username, "/", "testeSync");
-                //fileManager.shareFolder(username, "ana", "testeSync");
+                //fileManager.shareFolder(username, "ana", "testeSync", false);
 
                 // ────────────────────────────────────────────────
                 // R3: Pasta partilhada (via RabbitMQ apenas - teste manual)
@@ -88,8 +87,36 @@ public class LoginClient
                 //else
                 //{
                 //    System.out.println("Partilhando pasta testeSync com '" + target + "'...");
-                //    fileManager.shareFolder(username, target, folderName);
+                //    fileManager.shareFolder(username, target, folderName, false);
                 //}
+
+                // ────────────────────────────────────────────────
+                // R4: Sincronizar pastas partilhadas com o utilizador
+                //String folderName = "testeSync";
+                //String owner = "ptrck"; // ← substitui pelo nome real de quem partilhou
+
+                //System.out.println("Sincronizando pasta partilhada '" + folderName + "' de " + owner + "...");
+                //boolean syncOk = fileManager.syncSharedFolder(username, folderName, owner);
+                //System.out.println("Status da sincronização: " + syncOk);
+
+
+                // ────────────────────────────────────────────────
+                // R5: TESTE DE PROPAGAÇÃO PERSISTENTE (JSON)
+                // Partilha persistente (real copy), sincronização automática
+
+                // Criação inicial da pasta
+                fileManager.createFolder(username, "/", "pastaR5");
+
+                // Partilha real (persistente) com outro utilizador
+                fileManager.shareFolder(username, "ptrck", "pastaR5", true);
+
+                // Renomear a pasta para verificar propagação
+                fileManager.renameFolder(username, "/pastaR5", "pastaR5_renomeada");
+
+                // Apagar a pasta para verificar se cópias nas partilhas são removidas
+                fileManager.deleteFolder(username, "/pastaR5_renomeada");
+
+
             }
             else
             {

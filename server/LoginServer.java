@@ -3,6 +3,7 @@ import edu.ufp.inf.sd.rmi.projecto_SD.d_drive.common.LoginServiceRI;
 import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 
 public class LoginServer
 {
@@ -11,7 +12,7 @@ public class LoginServer
         try
         {
             String host = InetAddress.getLocalHost().getHostAddress();
-            int port = 15679;
+            int port = 1099;
             String serviceName = "LoginService";
 
             if (args.length == 3)
@@ -26,7 +27,7 @@ public class LoginServer
             }
 
             System.setProperty("java.rmi.server.hostname", host);
-            Registry registry = LocateRegistry.createRegistry(port);
+            Registry registry = LocateRegistry.getRegistry(host, port);
 
             LoginServiceRI loginService = new LoginServiceImpl();
             registry.rebind(serviceName, loginService);
